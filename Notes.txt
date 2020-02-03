@@ -1,0 +1,6 @@
+1. ASP.NET Core 3.0 version: https://github.com/TryCatchLearn/DatingApp30
+
+2. dotnet watch run
+
+3. npm install -g @angular/cli
+	ng new DatingApp_SPA
