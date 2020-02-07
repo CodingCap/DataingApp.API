@@ -4,3 +4,5 @@
 
 3. npm install -g @angular/cli
 	ng new DatingApp_SPA
+
+4. jwt.io
