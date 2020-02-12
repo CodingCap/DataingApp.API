@@ -5,4 +5,15 @@
 3. npm install -g @angular/cli
 	ng new DatingApp_SPA
 
-4. jwt.io
+Section 6
+- alertify js
+- Tokens management
+	- jwt.io to verify the tokens
+	- https://github.com/auth0/angular2-jwt
+
+Themes and colors
+	- https://valor-software.com/ngx-bootstrap/#/
+	- https://bootswatch.com/
+	
+Section 8
+	- random generator https://www.json-generator.com/

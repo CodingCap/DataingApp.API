@@ -14,5 +14,15 @@ namespace DataingApp.API.Helpers
             response.Headers.Add("Access-Control-Expose-Headers", "Application-Error");
             response.Headers.Add("Access-Control-Allow-Origin", "*");
         }
+
+        public static int CalculateAge(this DateTime value)
+        {
+            var age = DateTime.Today.Year - value.Year;
+
+            if (value.AddYears(age) > DateTime.Today)
+                age--;
+
+            return age;
+        }
     }
 }
