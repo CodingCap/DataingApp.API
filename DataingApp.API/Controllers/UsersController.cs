@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AutoMapper;
-using DataingApp.API.Data;
-using DataingApp.API.Dtos;
+﻿using System.Threading.Tasks;
+using DataingApp.API.CQRS.Queries;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,33 +11,28 @@ namespace DataingApp.API.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly IDatingRepository _repo;
-        private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
-        public UsersController(IDatingRepository repo, IMapper mapper)
+        public UsersController(IMediator mediator)
         {
-            _repo = repo;
-            _mapper = mapper;
+            _mediator = mediator;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
-            var users = await _repo.GetUsers();
+            var query = new GetUsersQuery();
+            var result = await _mediator.Send(query);
 
-            var userToReturn = _mapper.Map<IEnumerable<UserForListDto>>(users);
-
-            return Ok(userToReturn);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUser(int id)
         {
-            var user = await _repo.GetUser(id);
-
-            var userToReturn = _mapper.Map<UserforDetailDto>(user);
-
-            return Ok(userToReturn);
+            var query = new GetUserByIDQuery(id);
+            var result = await _mediator.Send(query);
+            return result != null ? (IActionResult) Ok(result) : NotFound();
         }
     }
 }

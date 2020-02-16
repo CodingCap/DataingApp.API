@@ -3,6 +3,9 @@ using System.Text;
 using AutoMapper;
 using DataingApp.API.Data;
 using DataingApp.API.Helpers;
+using DataingApp.API.PipelineBehaviour;
+using FluentValidation;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -55,6 +58,9 @@ namespace DataingApp.API
                     };
                 });
             services.AddAutoMapper(typeof(DatingRepository).Assembly);
+            services.AddMediatR(typeof(Startup));
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+            services.AddValidatorsFromAssembly(typeof(Startup).Assembly);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,14 +1,9 @@
 ﻿using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
-using DataingApp.API.Data;
 using DataingApp.API.Dtos;
-using DataingApp.API.Models;
+using FluentValidation;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 
 namespace DataingApp.API.Controllers
 {
@@ -16,13 +11,11 @@ namespace DataingApp.API.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthRepository _repo;
-        private readonly IConfiguration _config;
+        private readonly IMediator _mediator;
 
-        public AuthController(IAuthRepository repo, IConfiguration config)
+        public AuthController(IMediator mediator)
         {
-            _repo = repo;
-            _config = config;
+            _mediator = mediator;
         }
 
         [HttpPost("register")]
@@ -32,57 +25,24 @@ namespace DataingApp.API.Controllers
             //TODO
             //validate request
             //daca scot atributul ApiController de la clasa atunci tre sa validez model statul
+            //if (!ModelState.IsValid)
+            //    return BadRequest(ModelState);
 
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
 
-            userForRegisterDto.UserName = userForRegisterDto.UserName.ToLower();
-            if (await _repo.UserExists(userForRegisterDto.UserName))
-                return BadRequest("User name already exists");
-
-            var userToCreate = new User
-            {
-                UserName = userForRegisterDto.UserName
-            };
-
-            var createdUser = await _repo.Register(userToCreate, userForRegisterDto.Password);
-
-            //201 created
-            //si ar trebui intors si obiectul creat
-            return StatusCode(201);
+            //throw new ValidationException("de la mine");
+            return await _mediator.Send(userForRegisterDto);
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserForLoginDTO userForLoginDto)
         {
-            var userFromRepo = await _repo.Login(userForLoginDto.UserName.ToLower(), userForLoginDto.Password);
+            var result = await _mediator.Send(userForLoginDto);
 
-            if (userFromRepo == null)
+            if (string.IsNullOrEmpty(result))
                 return Unauthorized();
-
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, userFromRepo.ID.ToString()),
-                new Claim(ClaimTypes.Name, userFromRepo.UserName)
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.GetSection("AppSettings:Token").Value));
-
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddDays(1),
-                SigningCredentials = creds
-            };
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-
             return Ok(new
             {
-                token = tokenHandler.WriteToken(token)
+                token = result
             });
         }
     }
