@@ -24,12 +24,12 @@ namespace DataingApp.API.Data
             _dataContext.Remove(enitity);
         }
 
-        public async Task<bool> SaveAll()
+        public async Task<bool> SaveAllAsync()
         {
             return await _dataContext.SaveChangesAsync() > 0;
         }
 
-        public async Task<IEnumerable<User>> GetUsers()
+        public async Task<IEnumerable<User>> GetUsersAsync()
         {
             var users = await _dataContext.Users
                 .Include(u => u.Photos)
@@ -38,13 +38,18 @@ namespace DataingApp.API.Data
             return users;
         }
 
-        public async Task<User> GetUser(int id)
+        public async Task<User> GetUserAsync(int id)
         {
             var user = await _dataContext.Users
                 .Include(u => u.Photos)
                 .FirstOrDefaultAsync(p => p.ID == id);
 
             return user;
+        }
+
+        public async Task<Photo> GetPhotoAsync(int id)
+        {
+            var photo = await _dataContext.Photos.FirstOrDefaultAsync(p => p.PhotoId == id);
         }
     }
 }

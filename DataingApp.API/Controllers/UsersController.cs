@@ -1,5 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System.Security.Claims;
+using System.Threading.Tasks;
 using DataingApp.API.CQRS.Queries;
+using DataingApp.API.Dtos;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,6 +35,17 @@ namespace DataingApp.API.Controllers
             var query = new GetUserByIDQuery(id);
             var result = await _mediator.Send(query);
             return result != null ? (IActionResult) Ok(result) : NotFound();
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(int id, UserForUpdateDto userForUpdate)
+        {
+            if (id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                return Unauthorized();
+
+            userForUpdate.DtoId = id;
+
+            return await _mediator.Send(userForUpdate);
         }
     }
 }

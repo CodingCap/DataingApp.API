@@ -23,7 +23,7 @@ namespace DataingApp.API.CQRS.Handlers
 
         public async Task<IEnumerable<UserForListDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
         {
-            var users = await _repo.GetUsers();
+            var users = await _repo.GetUsersAsync();
 
             var userToReturn = _mapper.Map<IEnumerable<UserForListDto>>(users);
 

@@ -18,6 +18,10 @@ namespace DataingApp.API.Helpers
                 .ForMember(d => d.Age, opt => opt.MapFrom(s => s.DathOfBirth.CalculateAge()));
             
             CreateMap<Photo, PhotosForDetailedDto>();
+            CreateMap<Photo, PhotoForReturnDto>();
+            CreateMap<PhotoForCreationDto, Photo>();
+
+            CreateMap<UserForUpdateDto, User>();
         }
     }
 }
