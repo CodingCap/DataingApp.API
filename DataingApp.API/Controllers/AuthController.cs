@@ -38,11 +38,12 @@ namespace DataingApp.API.Controllers
         {
             var result = await _mediator.Send(userForLoginDto);
 
-            if (string.IsNullOrEmpty(result))
+            if (string.IsNullOrEmpty(result.Item1))
                 return Unauthorized();
             return Ok(new
             {
-                token = result
+                token = result.Item1,
+                result.user
             });
         }
     }

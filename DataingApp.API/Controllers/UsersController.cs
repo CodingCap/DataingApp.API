@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using DataingApp.API.CQRS.Queries;
 using DataingApp.API.Dtos;
+using DataingApp.API.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,10 +22,14 @@ namespace DataingApp.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUsers()
+        public async Task<IActionResult> GetUsers([FromQuery]GetUsersQuery query)
         {
-            var query = new GetUsersQuery();
+            //var query = new GetUsersQuery();
+            var user = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            query.UserID = user;
+
             var result = await _mediator.Send(query);
+            Response.AddPagination(result.CurrentPage, result.PageSize, result.TotalCount, result.TotalPages);
 
             return Ok(result);
         }

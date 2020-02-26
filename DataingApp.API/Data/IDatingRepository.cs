@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using DataingApp.API.CQRS.Queries;
+using DataingApp.API.Helpers;
 using DataingApp.API.Models;
 
 namespace DataingApp.API.Data
@@ -11,10 +13,12 @@ namespace DataingApp.API.Data
 
         Task<bool> SaveAllAsync();
 
-        Task<IEnumerable<User>> GetUsersAsync();
+        Task<PagedList<User>> GetUsersAsync(GetUsersQuery userParams);
 
         Task<User> GetUserAsync(int id);
 
         Task<Photo> GetPhotoAsync(int id);
+
+        Task<Photo> GetainPhotoForUser(int userId);
     }
 }

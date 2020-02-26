@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using DataingApp.API.CQRS.Queries;
+using DataingApp.API.Helpers;
 using DataingApp.API.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,19 +27,44 @@ namespace DataingApp.API.Data
         {
             _dataContext.Remove(enitity);
         }
-
+         
         public async Task<bool> SaveAllAsync()
         {
             return await _dataContext.SaveChangesAsync() > 0;
         }
 
-        public async Task<IEnumerable<User>> GetUsersAsync()
+        public async Task<PagedList<User>> GetUsersAsync(GetUsersQuery userParams)
         {
-            var users = await _dataContext.Users
+            var users = _dataContext.Users
                 .Include(u => u.Photos)
-                .ToListAsync();
+                .OrderBy(u => u.LastActive)
+                .AsQueryable();
 
-            return users;
+            users = users.Where(u => u.ID != userParams.UserID);
+            users = users.Where(u => u.Gender == userParams.Gender);
+
+            if (userParams.MinAge != 18 || userParams.MaxAge != 99)
+            {
+                var minDob = DateTime.Today.AddYears(-userParams.MaxAge - 1);
+                var maxDob = DateTime.Today.AddYears(-userParams.MinAge);
+
+                users = users.Where(u => u.DathOfBirth >= minDob && u.DathOfBirth <= maxDob);
+            }
+
+            if (!string.IsNullOrEmpty(userParams.OrderBy))
+            {
+                switch (userParams.OrderBy)
+                {
+                    case "created":
+                        users = users.OrderByDescending(u => u.Created);
+                        break;
+                    default:
+                        users = users.OrderByDescending(u => u.LastActive);
+                        break;
+                }
+            }
+
+            return await PagedList<User>.CreateAsync(users, userParams.PageNumber, userParams.PageSize);
         }
 
         public async Task<User> GetUserAsync(int id)
@@ -49,7 +78,12 @@ namespace DataingApp.API.Data
 
         public async Task<Photo> GetPhotoAsync(int id)
         {
-            var photo = await _dataContext.Photos.FirstOrDefaultAsync(p => p.PhotoId == id);
+            return await _dataContext.Photos.FirstOrDefaultAsync(p => p.PhotoId == id);
+        }
+
+        public async Task<Photo> GetainPhotoForUser(int userId)
+        {
+            return await _dataContext.Photos.Where(u => u.UserId == userId).FirstOrDefaultAsync(p => p.IsMain);
         }
     }
 }

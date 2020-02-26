@@ -9,6 +9,7 @@ namespace DataingApp.API.Helpers
     {
         public AutomapperProfiles()
         {
+            CreateMap<PagedList<User>, PagedList<UserForListDto>>();
             CreateMap<User, UserForListDto>()
                 .ForMember(d => d.PhotoUrl, opt => opt.MapFrom(src => src.Photos.FirstOrDefault(p => p.IsMain).Url))
                 .ForMember(d => d.Age, opt => opt.MapFrom(s => s.DathOfBirth.CalculateAge()));
@@ -22,6 +23,7 @@ namespace DataingApp.API.Helpers
             CreateMap<PhotoForCreationDto, Photo>();
 
             CreateMap<UserForUpdateDto, User>();
+            
         }
     }
 }
